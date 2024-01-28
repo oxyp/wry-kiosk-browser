@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+
+exit_code=0
+
+# Uncomment if mdbook is used
+#./bin/lint-doc || exit_code=1
+./bin/lint-js || exit_code=1
+./bin/lint-sh || exit_code=1
+./bin/lint-rs || exit_code=1
+
+exit "$exit_code"

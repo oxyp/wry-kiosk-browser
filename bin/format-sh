@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+
+list_files() {
+	git ls-files | while read -r line; do if [[ "$line" =~ [.]sh$ ]] || head -n1 "$line" | grep -qw bash || [[ "$(basename "$line")" == ".bash_profile" ]] || [[ "$(basename "$line")" == ".profile" ]]; then echo "$line"; fi; done 2>/dev/null
+}
+
+case "${1:-}" in
+--list) list_files ;;
+--check) list_files | xargs -I{} shfmt -d "{}" ;;
+*) list_files | xargs -I{} shfmt -l -w "{}" ;;
+esac

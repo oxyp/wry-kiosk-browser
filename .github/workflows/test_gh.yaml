@@ -1,0 +1,26 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+name: Test Github Workflows
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  format_yaml:
+    name: Yaml Format
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install tools
+        run: sudo snap install yq
+      - name: Format YAML files
+        run: ./bin/format-yaml --check
+  pass_gh:
+    needs: ["format_yaml"]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cleared for merging
+        run: echo OK

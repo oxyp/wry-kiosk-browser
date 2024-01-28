@@ -1,0 +1,4 @@
+set -eux
+cd "$(dirname "$(realpath "$0")")/.."
+
+./bin/test-rs

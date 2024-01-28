@@ -1,0 +1,5 @@
+cd "$(dirname "$(realpath "$0")")/.."
+bin/format-rs "${@}"
+bin/format-js "${@}"
+bin/format-sh "${@}"
+bin/format-yaml "${@}"

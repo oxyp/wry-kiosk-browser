@@ -1,0 +1,70 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'Cargo.*'
+      - '.github/**'
+      - 'bin/**'
+name: Test Rust
+env:
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  format_rs:
+    name: Rust Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: ./bin/setup rustup rust nightly
+      - name: Format rust code
+        run: ./bin/format-rs --check
+  test_rs:
+    name: Rust Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: ./bin/setup rustup rust
+      - name: Test rust code
+        run: ./bin/test-rs
+  lint_rs:
+    name: Rust Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: ./bin/setup rustup rust
+      - name: Test rust code
+        run: ./bin/lint-rs
+  coverage_rs:
+    name: Rust Test Coverage
+    runs-on: ubuntu-latest
+    container:
+      image: xd009642/tarpaulin
+      options: --security-opt seccomp=unconfined
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Test rust code
+        run: ./bin/coverage-rs
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v1
+        with:
+          name: code-coverage-report
+          path: tarpaulin-report.html
+  pass_rs:
+    needs: ["test_rs", "format_rs", "lint_rs", "coverage_rs"]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cleared for merging
+        run: echo OK

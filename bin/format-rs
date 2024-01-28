@@ -1,0 +1,6 @@
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+
+# If --check is passed as the first argument, update the arguments:
+[[ "${1:-}" != "--check" ]] || set -- --all --check
+
+cargo +nightly fmt "${@}"

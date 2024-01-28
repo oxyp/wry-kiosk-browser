@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+RUST_VERSION=1.64.0
+TARPAULIN_VERSION=0.16.0
+AUDIT_VERSION=0.13.1
+MDBOOK_VERSION=0.4.7
+MDBOOK_LINKCHECK_VERSION=0.7.7
+APT_PACKAGES="libudev-dev build-essential libssl-dev pkg-config gdb-multiarch minicom openocd libwebkit2gtk-4.0-dev socat shellcheck screen"
+SNAP_PACKAGES="shfmt"
+
+check_apt_packages() {
+	# APT_PACKAGES should be expanded, not quoted.
+	# shellcheck disable=SC2086
+	dpkg-query -W -f='${db:Status-Want;1}${db:Status-Status;1}\t${binary:Package}\t${source:Version}\n' $APT_PACKAGES | awk '($1 != "ii"){code += 1; print $0}END{exit code}' >&2
+}
+install_apt_packages() {
+	# APT_PACKAGES should be expanded, not quoted.
+	# shellcheck disable=SC2086
+	sudo apt-get install -yy $APT_PACKAGES
+}
+check_snaps() {
+	(
+		set -eu
+		# SNAP_PACKAGES should be expanded, not quoted.
+		# shellcheck disable=SC2086
+		for snap in $SNAP_PACKAGES; do
+			snap list "$snap"
+		done
+	)
+}
+install_snaps() {
+	# SNAP_PACKAGES should be expanded, not quoted.
+	# shellcheck disable=SC2086
+	sudo snap install $SNAP_PACKAGES
+}
+check_rustup() {
+	command -v rustup | grep -q .
+}
+install_rustup() {
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+	. "$HOME/.bashrc"
+}
+check_rust() {
+	command -v cargo | grep -q . && [[ "$(cargo --version | awk '{print $2}')" == "$RUST_VERSION" ]]
+}
+install_rust() {
+	rustup toolchain install $RUST_VERSION
+	rustup default $RUST_VERSION
+}
+#arm_package=gcc-4.7-multilib-arm-linux-gnueabihf
+#check_arm() {
+#	dpkg-query -s $package
+#}
+#install_arm() {
+#	sudo apt-get install $package
+#}
+#check_arm() {
+#	false # rustup target list == all available targets but doesn't say whether they are installed.
+#}
+#install_arm() {
+#	rustup target add armv7-unknown-linux-gnueabihf
+#}
+check_arm() {
+	: Checking arm cross compilation tools
+	command -v cross | grep -q .
+}
+install_arm() {
+	: Installing arm cross compilation tools
+	cargo install cross
+}
+check_docker() {
+	command -v docker | grep -q .
+}
+install_docker() {
+	echo Please install docker - see the docker website for instructions.
+	exit 1
+}
+check_tarpaulin() {
+	[[ "$(cargo tarpaulin --version | awk '{print $3}')" == "$TARPAULIN_VERSION" ]]
+}
+install_tarpaulin() {
+	cargo install -f --version "$TARPAULIN_VERSION" cargo-tarpaulin
+}
+check_audit() {
+	[[ "$(cargo audit --version | awk '{print $3}')" == "$AUDIT_VERSION" ]]
+}
+install_audit() {
+	cargo install --version "$AUDIT_VERSION" cargo-audit
+}
+check_mdbook() {
+	[[ "$(mdbook --version | awk '{print $2}' | tr -d v)" == "$MDBOOK_VERSION" ]]
+}
+install_mdbook() {
+	cargo install -f --version "$MDBOOK_VERSION" mdbook
+}
+check_mdbook_linkcheck() {
+	[[ "$(mdbook-linkcheck --version | awk '{print $2}' | tr -d v)" == "$MDBOOK_LINKCHECK_VERSION" ]]
+}
+install_mdbook_linkcheck() {
+	cargo install -f --version "$MDBOOK_LINKCHECK_VERSION" mdbook-linkcheck
+}
+check_nightly() {
+	rustup toolchain list | grep -q nightly
+}
+install_nightly() {
+	rustup toolchain install nightly
+	rustup component add rustfmt --toolchain nightly
+}
+check_shfmt() {
+	command -v shfmt >/dev/null
+}
+install_shfmt() {
+	GO111MODULE=on go get mvdan.cc/sh/v3/cmd/shfmt
+}
+check_npm() {
+	command -v node >/dev/null
+}
+install_npm() {
+	sudo apt-get install -yy nodejs
+}
+check_jstools() {
+	test -d node_modules/.bin
+}
+install_jstools() {
+	npm ci
+}
+
+cd "$(dirname "$(realpath "$0")")/.." || exit 1
+
+check_and_install() {
+	item="$1"
+	"check_${item}" || { "install_${item}" && "check_${item}"; }
+}
+
+check_all() {
+	check_and_install apt_packages
+	check_and_install snaps
+	check_and_install rustup
+	check_and_install rust
+	check_and_install tarpaulin
+	check_and_install mdbook
+	check_and_install mdbook_linkcheck
+	check_and_install nightly
+	check_and_install arm
+	check_and_install docker
+	check_and_install npm
+	check_and_install jstools
+}
+
+EXIT_CODE=0
+if (($# == 0)); then
+	check_all
+else
+	while (($# > 0)); do
+		arg="$1"
+		shift 1
+		check_and_install "$arg" || {
+			echo "ERROR:  Failed to install '$arg'"
+		} >&2
+	done
+fi
+exit "$EXIT_CODE"

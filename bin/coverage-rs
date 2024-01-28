@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+cd "$(dirname "$(realpath "$0")")/.."
+rm -f tarpaulin-report.html
+cargo tarpaulin -o html --all-features --exclude-files "**/test.rs" --exclude-files "**/bin/*" --exclude-files "**/tests/**" "${@}" || true
+if command -v xdg-open; then
+	xdg-open tarpaulin-report.html || true
+fi

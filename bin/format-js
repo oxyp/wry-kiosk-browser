@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+cd "$(dirname "$(realpath "$0")")/.."
+
+case "${1:---write}" in
+--write)
+	command="--write"
+	;;
+--check)
+	command="--list-different"
+	;;
+*)
+	echo "Unknown flag: '$1'" >&2
+	exit 1
+	;;
+esac
+
+npm ci
+./node_modules/.bin/prettier "${command}" 'src/**/*.{css,json,html,js}'

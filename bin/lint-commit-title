@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+COMMIT_TITLE="$1"
+
+echo "$COMMIT_TITLE" | gawk '
+BEGIN{
+  types["clean"]=0;
+  types["feat"]=0;
+  types["fix"]=0;
+  types["docs"]=0;
+  types["text"]=0;
+  types["test"]=0;
+  types["style"]=0;
+  types["refactor"]=0;
+  types["process"]=0;
+  types["revert"]=0;
+  issue_names["#"]=0;
+  issue_names["oxyp/oxyprem-pi#"]=0;
+  issue_names["oxyp/oxyprem-web-server#"]=0;
+}
+($1 == "Merge"){ exit 0 }
+{match($0, /^([[:alnum:]]+) ([[:alpha:]#]+)[0-9]+[(][^]]*[)]: .+/, array);
+if (RLENGTH == -1) {print "Invalid commit message format:", $0; print "      TYPE ISSUE(SCOPE): MESSAGE\ne.g.  feat i33(front end): Made a popup" ; exit(1)};
+if (!(array[1] in types)) { print "Invalid type:", array[1]; print "Valid types:"; for (key in types) print " ", key; exit 1 }
+if (!(array[2] in issue_names)) { print "Invalid issue name:", array[2]; exit 1 }
+}'

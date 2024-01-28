@@ -1,0 +1,36 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+name: Test Shell
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  format_sh:
+    name: Shell Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: ./bin/setup snaps
+      - name: Format shell code
+        run: ./bin/format-sh --check
+  lint_sh:
+    name: Shell Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: ./bin/setup apt
+      - name: Test rust code
+        run: ./bin/lint-sh
+  pass_sh:
+    needs: ["format_sh", "lint_sh"]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cleared for merging
+        run: echo OK

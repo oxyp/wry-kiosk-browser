@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+cd "$(dirname "$(realpath "$0")")/.."
+
+# We really do want to expand the list of files
+#shellcheck disable=SC2046
+./node_modules/.bin/eslint "${@}" $(git ls-files | grep -E '[.]js$')

@@ -1,0 +1,24 @@
+# Hidden files must be added explicitly
+.*
+
+# Temporary and editor files
+,*
+tmp
+/.idea/
+/.vscode/
+/.vs/
+*.screenlog
+*.screenlog.*
+
+# Programming languages
+## Rust build artefacts
+target
+tarpaulin-report.html
+
+## Node build artefacts
+node_modules
+
+## Disk images
+*.img
+*.iso
+iso

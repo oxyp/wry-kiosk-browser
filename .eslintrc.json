@@ -1,0 +1,31 @@
+{
+    "parser": "@babel/eslint-parser",
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "extends": [
+        "google"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module",
+	"requireConfigFile": false
+    },
+    "rules": {
+       "camelcase": "off",
+       "indent": "off",
+       "space-before-function-paren": "off",
+       "comma-dangle": "off",
+       "object-curly-spacing": "off",
+       "operator-linebreak": "off",
+       "quotes": ["error", "double", { "avoidEscape": true }],
+       "semi": ["error", "always"],
+       "max-len": ["error", { "code": 200 }],
+       "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "vars": "local" }]
+    }
+}

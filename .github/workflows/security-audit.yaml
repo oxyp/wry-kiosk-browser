@@ -1,0 +1,32 @@
+name: Security audit
+on:
+  push:
+    paths:
+      # Run if this action changes.
+      - '.github/workflows/security-audit.yaml'
+      # Run if the list of packages changes
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
+      - '**/package.json'
+      - '**/package-lock.json'
+      # Run if the configuration changes
+      - '**/audit.toml'
+  schedule:
+    # Run periodically to detect new vulnerabilities
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+jobs:
+  rust_audit:
+    name: Rust package audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cargo Audit
+        run: cargo audit
+  js_audit:
+    name: Javascript Package Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit packages
+        run: npm audit
