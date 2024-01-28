@@ -1,5 +1,10 @@
-[workspace]
+[package]
+name = "wry-kiosk-browser"
+version = "0.1.0"
+edition = "2021"
 
-members = [
-  "src/sample"
-]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tao = "0.24"
+wry = "0.35.2"

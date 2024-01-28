@@ -1,3 +1,5 @@
-# repo-template
+# Wry Kiosk Browser
 
-![Security Audit](https://github.com/oxyp/repo-template/actions/workflows/security-audit.yaml/badge.svg)
+A minimalist full-screen browser.
+
+![Security Audit](https://github.com/bitdivine/wry-kiosk-browser/actions/workflows/security-audit.yaml/badge.svg)
